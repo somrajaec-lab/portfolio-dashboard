@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Holdings Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-card: #1a1d29;
+            --bg-card-hover: #222639;
+            --bg-header: #141722;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --text-muted: #5f6368;
+            --accent: #8ab4f8;
+            --accent2: #81c995;
+            --border: #2d3142;
+            --positive: #34a853;
+            --positive-bg: rgba(52,168,83,0.12);
+            --negative: #ea4335;
+            --negative-bg: rgba(234,67,53,0.12);
+            --warning: #fbbc04;
+            --warning-bg: rgba(251,188,4,0.12);
+            --info: #8ab4f8;
+            --info-bg: rgba(138,180,248,0.12);
+            --gap: 16px;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .dashboard-container { max-width: 1600px; margin: 0 auto; padding: var(--gap); }
+
+        /* Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            margin-bottom: var(--gap);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .dashboard-header h1 { font-size: 22px; font-weight: 700; color: #fff; }
+        .dashboard-header .subtitle { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+            margin-bottom: var(--gap);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-section:hover, .upload-section.dragover {
+            border-color: var(--accent);
+            background: rgba(138,180,248,0.05);
+        }
+        .upload-section h2 { font-size: 18px; margin-bottom: 8px; color: var(--accent); }
+        .upload-section p { color: var(--text-secondary); font-size: 14px; }
+        .upload-section input[type="file"] { display: none; }
+        .upload-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 12px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover { background: #aecbfa; transform: translateY(-1px); }
+        .upload-status { margin-top: 12px; font-size: 13px; }
+        .upload-status.success { color: var(--positive); }
+        .upload-status.error { color: var(--negative); }
+
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--gap);
+            margin-bottom: var(--gap);
+        }
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .kpi-card:hover { background: var(--bg-card-hover); transform: translateY(-2px); }
+        .kpi-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .kpi-value { font-size: 26px; font-weight: 700; }
+        .kpi-sub { font-size: 12px; margin-top: 4px; }
+        .kpi-sub.positive { color: var(--positive); }
+        .kpi-sub.negative { color: var(--negative); }
+
+        /* Chart Row */
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: var(--gap);
+            margin-bottom: var(--gap);
+        }
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+        }
+        .chart-container h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary); }
+        .chart-container canvas { max-height: 280px; }
+
+        /* Filters */
+        .filters-bar {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: var(--gap);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid var(--border);
+        }
+        .filters-bar label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group { display: flex; align-items: center; gap: 6px; }
+        .filter-group select, .search-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-group select:focus, .search-input:focus { border-color: var(--accent); }
+        .search-input { width: 200px; }
+        .filter-group select option { background: var(--bg-card); }
+
+        /* Main Table */
+        .table-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: var(--gap);
+        }
+        .table-section h3 {
+            font-size: 15px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .table-scroll { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table thead th {
+            text-align: left;
+            padding: 12px 14px;
+            background: var(--bg-header);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border-bottom: 2px solid var(--border);
+        }
+        .data-table thead th:hover { color: var(--accent); background: #1c2030; }
+        .data-table thead th .sort-arrow { margin-left: 4px; font-size: 10px; }
+        .data-table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(45,49,66,0.5);
+            vertical-align: middle;
+        }
+        .data-table tbody tr { transition: background 0.15s; }
+        .data-table tbody tr:hover { background: var(--bg-card-hover); }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        /* Ticker column */
+        .ticker-cell { font-weight: 700; color: var(--accent); font-size: 13px; white-space: nowrap; }
+        .company-cell { color: var(--text-secondary); font-size: 12px; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .badge-very-good { background: var(--positive-bg); color: var(--positive); }
+        .badge-good { background: rgba(52,168,83,0.08); color: #81c995; }
+        .badge-average { background: var(--warning-bg); color: var(--warning); }
+        .badge-bad { background: var(--negative-bg); color: var(--negative); }
+        .badge-strong { background: var(--positive-bg); color: var(--positive); }
+        .badge-mod-strong { background: rgba(52,168,83,0.08); color: #81c995; }
+        .badge-mod-weak { background: var(--warning-bg); color: var(--warning); }
+        .badge-weak { background: var(--negative-bg); color: var(--negative); }
+        .badge-increase { background: var(--positive-bg); color: var(--positive); }
+        .badge-decrease { background: var(--negative-bg); color: var(--negative); }
+        .badge-buying { background: var(--positive-bg); color: var(--positive); }
+        .badge-selling { background: var(--negative-bg); color: var(--negative); }
+        .badge-neutral { background: var(--info-bg); color: var(--info); }
+        .badge-spike { background: var(--warning-bg); color: var(--warning); }
+        .badge-no-spike { background: rgba(95,99,104,0.15); color: var(--text-muted); }
+
+        .pnl-positive { color: var(--positive); font-weight: 600; }
+        .pnl-negative { color: var(--negative); font-weight: 600; }
+        .pe-high { color: var(--negative); }
+        .pe-medium { color: var(--warning); }
+        .pe-low { color: var(--positive); }
+        .down-severe { color: var(--negative); }
+        .down-moderate { color: var(--warning); }
+        .down-mild { color: var(--positive); }
+
+        .news-cell { max-width: 350px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+        .price-movement { font-weight: 600; }
+
+        /* Expanded Row */
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .expand-btn:hover { background: rgba(138,180,248,0.1); }
+        .detail-row td { padding: 0 !important; border-bottom: 2px solid var(--accent) !important; }
+        .detail-content {
+            padding: 16px 20px;
+            background: rgba(138,180,248,0.03);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .detail-block h4 { font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .detail-block p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Footer */
+        .dashboard-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Tooltip */
+        .tooltip-wrapper { position: relative; cursor: help; }
+        .tooltip-wrapper:hover .tooltip-text { opacity: 1; visibility: visible; transform: translateY(0); }
+        .tooltip-text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            background: #2d3142;
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+            max-width: 300px;
+            white-space: normal;
+        }
+
+        /* Tab navigation */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: var(--gap);
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 4px;
+            border: 1px solid var(--border);
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: rgba(138,180,248,0.08); color: var(--text-primary); }
+        .tab-btn.active { background: var(--accent); color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        @media (max-width: 768px) {
+            .dashboard-header { flex-direction: column; align-items: flex-start; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .chart-row { grid-template-columns: 1fr; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+        }
+
+        @media print {
+            body { background: white; color: #000; }
+            .upload-section, .filters-bar, .tab-bar { display: none; }
+            .kpi-card, .chart-container, .table-section { border: 1px solid #ddd; box-shadow: none; background: white; }
+            .data-table thead th { background: #f0f0f0; color: #333; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div>
+            <h1>Portfolio Holdings Analysis</h1>
+            <div class="subtitle" id="last-updated">Upload your Kite holdings CSV to get started</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <button class="upload-btn" onclick="document.getElementById('csv-file').click()">Upload Kite CSV</button>
+            <button class="upload-btn" style="background:var(--accent2);" onclick="loadDefaultData()">Load Sample Data</button>
+        </div>
+    </header>
+
+    <!-- Upload Section (shown only before data loaded) -->
+    <div class="upload-section" id="upload-area">
+        <h2>Upload Your Kite Holdings</h2>
+        <p>Go to <strong>Kite &rarr; Portfolio &rarr; Holdings &rarr; Download CSV</strong> and drop it here</p>
+        <button class="upload-btn" onclick="document.getElementById('csv-file').click()">Choose CSV File</button>
+        <p style="margin-top:16px;color:var(--text-muted);font-size:12px;">Or click "Load Sample Data" above to see the dashboard with your current holdings</p>
+        <input type="file" id="csv-file" accept=".csv,.xlsx" onchange="handleFileUpload(event)">
+        <div class="upload-status" id="upload-status"></div>
+    </div>
+
+    <!-- Main Dashboard (hidden until data loaded) -->
+    <div id="main-dashboard" style="display:none;">
+
+        <!-- KPI Cards -->
+        <section class="kpi-row" id="kpi-section"></section>
+
+        <!-- Charts -->
+        <section class="chart-row">
+            <div class="chart-container">
+                <h3>P&L Distribution by Stock</h3>
+                <canvas id="pnl-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Quarterly Results Quality</h3>
+                <canvas id="results-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Govt Theme Correlation</h3>
+                <canvas id="theme-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Investment by Stock (₹)</h3>
+                <canvas id="invested-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview Table</button>
+            <button class="tab-btn" onclick="switchTab('fundamental')">Fundamental Analysis</button>
+            <button class="tab-btn" onclick="switchTab('news')">News & Themes</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>Search:</label>
+                <input type="text" class="search-input" id="search-input" placeholder="Search stock name..." oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Results:</label>
+                <select id="filter-results" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Very Good">Very Good</option>
+                    <option value="Good">Good</option>
+                    <option value="Average">Average</option>
+                    <option value="Bad">Bad</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Govt Theme:</label>
+                <select id="filter-theme" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Strong">Strong</option>
+                    <option value="Moderately Strong">Mod Strong</option>
+                    <option value="Moderately Weak">Mod Weak</option>
+                    <option value="Weak">Weak</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>P&L:</label>
+                <select id="filter-pnl" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="profit">In Profit</option>
+                    <option value="loss">In Loss</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Leadership:</label>
+                <select id="filter-leadership" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Strong">Strong</option>
+                    <option value="Average">Average</option>
+                    <option value="Weak">Weak</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Volume Spike:</label>
+                <select id="filter-volume" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- TAB 1: Overview Table -->
+        <div class="tab-content active" id="tab-overview">
+            <div class="table-section">
+                <h3>Holdings Overview <span id="stock-count" style="font-weight:400;color:var(--text-muted);font-size:13px;"></span></h3>
+                <div class="table-scroll">
+                    <table class="data-table" id="overview-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('ticker')">Stock <span class="sort-arrow" id="sort-ticker"></span></th>
+                                <th onclick="sortTable('company')">Company <span class="sort-arrow" id="sort-company"></span></th>
+                                <th onclick="sortTable('nse_code')">NSE Code <span class="sort-arrow" id="sort-nse_code"></span></th>
+                                <th onclick="sortTable('qty')" style="text-align:right">Qty <span class="sort-arrow" id="sort-qty"></span></th>
+                                <th onclick="sortTable('avg')" style="text-align:right">Avg Cost <span class="sort-arrow" id="sort-avg"></span></th>
+                                <th onclick="sortTable('ltp')" style="text-align:right">LTP <span class="sort-arrow" id="sort-ltp"></span></th>
+                                <th onclick="sortTable('pnl_pct')" style="text-align:right">P&L % <span class="sort-arrow" id="sort-pnl_pct"></span></th>
+                                <th onclick="sortTable('pe')" style="text-align:right">PE <span class="sort-arrow" id="sort-pe"></span></th>
+                                <th onclick="sortTable('down_52w')" style="text-align:right">52W High <span class="sort-arrow" id="sort-down_52w"></span></th>
+                                <th onclick="sortTable('qtr_result')">Q Results <span class="sort-arrow" id="sort-qtr_result"></span></th>
+                                <th onclick="sortTable('fii_dii')">FII/DII <span class="sort-arrow" id="sort-fii_dii"></span></th>
+                                <th onclick="sortTable('vol_spike')">Vol Spike <span class="sort-arrow" id="sort-vol_spike"></span></th>
+                                <th onclick="sortTable('qoq_profit')">QoQ Profit <span class="sort-arrow" id="sort-qoq_profit"></span></th>
+                                <th onclick="sortTable('qoq_rev')">QoQ Rev <span class="sort-arrow" id="sort-qoq_rev"></span></th>
+                                <th onclick="sortTable('price_15d')">15D Move <span class="sort-arrow" id="sort-price_15d"></span></th>
+                                <th onclick="sortTable('govt_theme')">Govt Theme <span class="sort-arrow" id="sort-govt_theme"></span></th>
+                                <th onclick="sortTable('leadership')">Leadership <span class="sort-arrow" id="sort-leadership"></span></th>
+                                <th style="width:30px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="overview-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Fundamental Analysis -->
+        <div class="tab-content" id="tab-fundamental">
+            <div class="table-section">
+                <h3>Detailed Fundamental Analysis</h3>
+                <div class="table-scroll">
+                    <table class="data-table" id="fundamental-table">
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Quarterly Results Detail</th>
+                                <th>QoQ Profit Detail</th>
+                                <th>QoQ Revenue Detail</th>
+                                <th>FII/DII Detail</th>
+                                <th>Volume Spike Detail</th>
+                                <th>Leadership Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fundamental-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: News & Themes -->
+        <div class="tab-content" id="tab-news">
+            <div class="table-section">
+                <h3>Recent News & Government Theme Alignment</h3>
+                <div class="table-scroll">
+                    <table class="data-table" id="news-table">
+                        <thead>
+                            <tr>
+                                <th style="width:120px;">Stock</th>
+                                <th>Recent News & Impact</th>
+                                <th>Govt Theme</th>
+                                <th>Theme Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="news-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="dashboard-footer">
+        <p>Portfolio Holdings Analysis Dashboard &bull; Data researched as of Feb 17, 2026 &bull; Qualitative data refreshed quarterly</p>
+    </footer>
+</div>
+
+<script>
+// ============================================================
+// EMBEDDED RESEARCH DATA
+// ============================================================
+const RESEARCH_DATA = {
+    "ANTELOPUS": {
+        company: "Antelopus (Selan Energy)", nse_code: "ANTELOPUS",
+        pe: 26.08, down_52w: -28.5,
+        qtr_result: "Good", qtr_detail: "PAT +60% YoY, Rev +11% YoY",
+        fii_dii: "Neutral", fii_detail: "FII 0.22%, DII 0%; Promoter 69.94%",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "+141% QoQ (recovery from weak Q2)",
+        qoq_rev: "Increase", qoq_rev_pct: "+29% QoQ recovery",
+        price_15d: "-1% to -2%",
+        news: "Cambay PSC deal exclusivity ended without SPA; Promoter stake rose to 70% from 30% (Aug 2025); Q3 recovery from weak Q2",
+        govt_theme: "Weak", govt_detail: "Oil & Gas E&P; not aligned with green energy focus",
+        leadership: "Average", lead_detail: "Promoter-led; rebranded from Selan; high concentration risk"
+    },
+    "AUBANK": {
+        company: "AU Small Finance Bank", nse_code: "AUBANK",
+        pe: 32.70, down_52w: -2.7,
+        qtr_result: "Very Good", qtr_detail: "Revenue +49% YoY, PAT +26% YoY",
+        fii_dii: "Buying", fii_detail: "FII 35.6%, DII 27.2%; stable to increasing",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Decrease", qoq_profit_pct: "-7.5% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "Sequential growth with 49% YoY",
+        price_15d: "+3.2%",
+        news: "RBI approved MD reappointment for 3 years; ESOP allotment Feb 13; Strong deposit growth 23.3% YoY",
+        govt_theme: "Moderately Strong", govt_detail: "Financial inclusion, digital banking, SME lending",
+        leadership: "Strong", lead_detail: "Sanjay Agarwal (founder) 30+ yrs experience"
+    },
+    "AVANTIFEED": {
+        company: "Avanti Feeds Ltd", nse_code: "AVANTIFEED",
+        pe: 25.69, down_52w: -6.5,
+        qtr_result: "Good", qtr_detail: "Revenue +1.3% YoY, PAT +10.5% YoY; margin expansion",
+        fii_dii: "Neutral", fii_detail: "FII 7.98%, DII 5.07%; Promoters 43.23%",
+        vol_spike: "Yes", vol_detail: "Surged 35% in 2 days on Indo-US shrimp tariff deal",
+        qoq_profit: "Decrease", qoq_profit_pct: "-14% QoQ (seasonal)",
+        qoq_rev: "Decrease", qoq_rev_pct: "-14% QoQ (seasonal)",
+        price_15d: "+32.8%",
+        news: "Indo-US trade deal: shrimp tariffs reduced from 50% to 18%; US buys 48% of India's shrimp exports; AI startup investment",
+        govt_theme: "Weak", govt_detail: "Aquaculture/export focused; marginal Make in India benefit",
+        leadership: "Average", lead_detail: "Professional management; solid operational execution"
+    },
+    "BANKINDIA": {
+        company: "Bank of India", nse_code: "BANKINDIA",
+        pe: 7.03, down_52w: -1.6,
+        qtr_result: "Good", qtr_detail: "PAT +7% YoY; Gross NPA improved 143 bps to 2.26%",
+        fii_dii: "Neutral", fii_detail: "FII 5.82%, DII 15.18%; Govt 73.38%",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "+9.3% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+0.3% QoQ",
+        price_15d: "+5.8%",
+        news: "Strong RAM advances +18% YoY; NPA ratio improved significantly; Capital adequacy 17.09%",
+        govt_theme: "Strong", govt_detail: "Govt PSU bank; infra lending, financial inclusion, rural dev",
+        leadership: "Average", lead_detail: "Govt-appointed; Rajneesh Karnatak as MD & CEO"
+    },
+    "BONDADA": {
+        company: "Bondada Engineering", nse_code: "BONDADA",
+        pe: 17.20, down_52w: -34.0,
+        qtr_result: "Very Good", qtr_detail: "Revenue +89% YoY, PAT +119% YoY; 9M Rev +125%",
+        fii_dii: "Weak", fii_detail: "FII 1.4%, DII 0.28%; Promoter 62.4%",
+        vol_spike: "Yes", vol_detail: "Surged 3.5-5% on project wins & green data center MoU",
+        qoq_profit: "Increase", qoq_profit_pct: "Strong momentum (9M +140% YoY)",
+        qoq_rev: "Increase", qoq_rev_pct: "Strong sequential growth",
+        price_15d: "+16.3%",
+        news: "MoU with Bryanston Renewables (Dubai) for green data center; Canara Bank loan for BESS project; 69.51 MWp solar commissioned",
+        govt_theme: "Strong", govt_detail: "Renewable energy, infra, green energy, PLI clean energy",
+        leadership: "Average", lead_detail: "Promoter-driven; strong project execution track record"
+    },
+    "BSE": {
+        company: "BSE Ltd", nse_code: "BSE",
+        pe: 52.30, down_52w: -15.0,
+        qtr_result: "Very Good", qtr_detail: "Revenue +61% YoY (ATH), PAT +174% YoY; NPM 45%",
+        fii_dii: "Mixed", fii_detail: "FII 17.45%, DII 23.74%; heavy put options activity",
+        vol_spike: "Yes", vol_detail: "Heavy put option activity; STT changes post Union Budget",
+        qoq_profit: "Increase", qoq_profit_pct: "+7.8% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+16.5% QoQ",
+        price_15d: "-3.5%",
+        news: "Q3 PAT +174%; SEBI approved midcap F&O launch; STT hike in Union Budget caused 11% drop; Options market share grew to 26.8%",
+        govt_theme: "Strong", govt_detail: "Core to capital markets infra, Digital India, financial dev",
+        leadership: "Strong", lead_detail: "Professional mgmt; tech innovation focus; MarketsMOJO Strong Buy"
+    },
+    "CANBK": {
+        company: "Canara Bank", nse_code: "CANBK",
+        pe: 7.62, down_52w: -11.8,
+        qtr_result: "Very Good", qtr_detail: "PAT +26% YoY; Revenue +10.4% YoY; Gross NPA 2.08%",
+        fii_dii: "Neutral", fii_detail: "FII 14.62%, DII 10.48%; Govt 62.93%",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "+8.3% QoQ",
+        qoq_rev: "Decrease", qoq_rev_pct: "-21.2% QoQ",
+        price_15d: "-2.4%",
+        news: "MCLR rates revised lower; India Ratings affirmed AAA/Stable; Tier-2 bond rated AAA; Global business +13.2% YoY",
+        govt_theme: "Strong", govt_detail: "Govt PSU bank; infra financing, rural dev, financial inclusion",
+        leadership: "Average", lead_detail: "Interim MD & CEO Hardeep Singh Ahluwalia; transition phase"
+    },
+    "EIHAHOTELS": {
+        company: "EIH Associated Hotels", nse_code: "EIHAHOTELS",
+        pe: 22.75, down_52w: -29.8,
+        qtr_result: "Average", qtr_detail: "PAT ₹40.59 Cr; Modest growth; FY25 Rev +7%",
+        fii_dii: "Weak", fii_detail: "FII 13.7%, DII 0%; Promoter 75%",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "+46.5% QoQ (seasonal Q3 strength)",
+        qoq_rev: "Increase", qoq_rev_pct: "Seasonal uptick in Q3",
+        price_15d: "-3.8%",
+        news: "Board approved Q3 results; Best-ever FY25 performance; Oberoi Group legacy continues",
+        govt_theme: "Weak", govt_detail: "Luxury hospitality; limited govt theme alignment",
+        leadership: "Strong", lead_detail: "Oberoi Group 50+ yr legacy; strong corporate governance"
+    },
+    "GKENERGY": {
+        company: "GK Energy Ltd", nse_code: "GKENERGY",
+        pe: 18.04, down_52w: -53.6,
+        qtr_result: "Very Good", qtr_detail: "Revenue +43.6% YoY, PAT +57.7% YoY",
+        fii_dii: "Stable", fii_detail: "FII 2.93%, DII 3.47%",
+        vol_spike: "Yes", vol_detail: "Locked in 5% upper circuit post Q3 results",
+        qoq_profit: "Increase", qoq_profit_pct: "+26.7% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+28.4% QoQ",
+        price_15d: "-2% to -5%",
+        news: "CARE Ratings upgrade; ₹227 Cr MSEDCL solar pump order; Two contracts worth ₹530 Cr; Promoter diluted from 93% to 79%",
+        govt_theme: "Strong", govt_detail: "PM-KUSUM scheme; ~15% market share; solar agri pumps",
+        leadership: "Average", lead_detail: "New entrant; Gopal Kabra strong execution but short history"
+    },
+    "ICICIBANK": {
+        company: "ICICI Bank Ltd", nse_code: "ICICIBANK",
+        pe: 20.56, down_52w: -5.7,
+        qtr_result: "Average", qtr_detail: "Revenue +2% YoY, PAT -4% YoY; provisions spike",
+        fii_dii: "Selling", fii_detail: "FII 43.9% (-1.8pp YoY), DII 42.3% (-2.7pp YoY)",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Decrease", qoq_profit_pct: "-8.4% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "NII +2% QoQ",
+        price_15d: "-0.5%",
+        news: "MD Sandeep Bakhshi reappointed till Oct 2028; Launched CGAS; Approved 9.95% stake in 8 banks incl Karur Vysya; Agri provision spike",
+        govt_theme: "Moderately Strong", govt_detail: "Infra financing, Digital India, financial inclusion, MSME",
+        leadership: "Strong", lead_detail: "Sandeep Bakhshi 40+ yrs; ROA 2.1%, ROE 16%; digital transformation leader"
+    },
+    "ICIL": {
+        company: "Indo Count Industries", nse_code: "ICIL",
+        pe: 23.95, down_52w: -21.5,
+        qtr_result: "Bad", qtr_detail: "Revenue -7.7% YoY, PAT -65.5% YoY; margin compression",
+        fii_dii: "Stable", fii_detail: "FII 9.86%, DII 6.03%; Promoter 58.74%",
+        vol_spike: "Yes", vol_detail: "Surged 20% on Feb 4; company clarified no price-sensitive info",
+        qoq_profit: "Decrease", qoq_profit_pct: "-37.4% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+0.06% QoQ (essentially flat)",
+        price_15d: "+20%",
+        news: "USA greenfield facility started Jan 2026; EU-FTA ensures duty-free textile exports; US trade deal; KMP changes",
+        govt_theme: "Moderately Weak", govt_detail: "Textile PLI benefit; but 85%+ revenue from exports",
+        leadership: "Average", lead_detail: "Anil Kumar Jain 45+ yrs; operational challenges despite expansion"
+    },
+    "KARURVYSYA": {
+        company: "Karur Vysya Bank", nse_code: "KARURVYSYA",
+        pe: 8.67, down_52w: -0.7,
+        qtr_result: "Very Good", qtr_detail: "Revenue +11.8% YoY, PAT +39.1% YoY",
+        fii_dii: "Buying", fii_detail: "FII 15.12%, MF 31.49%; ICICI Pru approved 9.95% stake",
+        vol_spike: "Yes", vol_detail: "Hit record high; surged 10% on Jan 27 post Q3 results",
+        qoq_profit: "Increase", qoq_profit_pct: "+20.2% QoQ",
+        qoq_rev: "Decrease", qoq_rev_pct: "-0.5% QoQ (minimal)",
+        price_15d: "+5% to +10%",
+        news: "MD reappointed for 3rd term; 900th branch opened; ICICI Pru approved 9.95% stake; Target ₹3T business in 4 yrs; NPA 0.71%",
+        govt_theme: "Moderately Strong", govt_detail: "MSME lending focus; ₹10K Cr MSME Growth Fund alignment",
+        leadership: "Strong", lead_detail: "B. Ramesh Babu 3-term MD; NPA 0.71%; strong MSME vision"
+    },
+    "KPEL": {
+        company: "KP Energy Ltd", nse_code: "KPEL",
+        pe: 13.06, down_52w: -51.8,
+        qtr_result: "Very Good", qtr_detail: "Revenue +63% YoY, EBITDA +75% YoY, PAT +57% YoY",
+        fii_dii: "Weak", fii_detail: "FII 0.6%, DII 1.05%; very low institutional ownership",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "+14.7% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+14.7% QoQ",
+        price_15d: "+2% to +3%",
+        news: "Warrant conversion at ₹412; Order book ₹2,600+ Cr; Botswana govt MoU for 5GW renewable; ₹4 dividend declared",
+        govt_theme: "Strong", govt_detail: "Wind power; Net Zero 2070; 140 GW wind target; clean energy",
+        leadership: "Strong", lead_detail: "Dr. Faruk Patel; KP Group infra; international expansion"
+    },
+    "KPIGREEN": {
+        company: "KPI Green Energy", nse_code: "KPIGREEN",
+        pe: 23.50, down_52w: -26.5,
+        qtr_result: "Very Good", qtr_detail: "Revenue +45% YoY, PAT +48% YoY; 7th consecutive record quarter",
+        fii_dii: "Stable", fii_detail: "FII 8.68%, DII 0.64%; Promoter pledging 45%",
+        vol_spike: "Yes", vol_detail: "Surged 1.5% on Feb 10 on 300 MWac Adani order",
+        qoq_profit: "Increase", qoq_profit_pct: "Positive sequential growth",
+        qoq_rev: "Increase", qoq_rev_pct: "+5.2% QoQ",
+        price_15d: "+3% to +6%",
+        news: "300 MWac Adani Khavda order; 534 MWac Adani order (Jan); UAE data center solar; India's first green bond ₹670 Cr; SBI ₹3,200 Cr loan",
+        govt_theme: "Strong", govt_detail: "Renewable energy; 280 GW solar target; PLI Solar PV; Net Zero 2070",
+        leadership: "Strong", lead_detail: "KP Group; 7 consecutive record quarters; 60-70% growth guidance to FY30"
+    },
+    "KPITTECH": {
+        company: "KPIT Technologies", nse_code: "KPITTECH",
+        pe: 32.90, down_52w: -39.9,
+        qtr_result: "Average", qtr_detail: "Revenue +9.5% YoY (22 consecutive growth Qs), PAT -29% (one-time provision)",
+        fii_dii: "Stable", fii_detail: "FII 17.18%, MF 13.32%",
+        vol_spike: "No", vol_detail: "Transaction activity up 144.53% in 30 days",
+        qoq_profit: "Decrease", qoq_profit_pct: "-29% YoY (adj. only -3.5%)",
+        qoq_rev: "Increase", qoq_rev_pct: "+9.5% YoY; 22 consecutive growth quarters",
+        price_15d: "-6% to -10%",
+        news: "Agentic AI showcase at CES 2026; JSW Motors partnership; $202M Q3 deal wins; Cloud services +29%; Labour code provision impacted Q3",
+        govt_theme: "Moderately Strong", govt_detail: "EV/autonomous software; Digital India; automotive PLI",
+        leadership: "Strong", lead_detail: "Kishor Patil co-founder; 22 consecutive growth quarters; Mercedes-Benz partnership"
+    },
+    "M&M": {
+        company: "Mahindra & Mahindra", nse_code: "M&M",
+        pe: 30.40, down_52w: -8.6,
+        qtr_result: "Very Good", qtr_detail: "Revenue +26% YoY, PAT +47-54% YoY; highest quarterly revenue",
+        fii_dii: "Stable", fii_detail: "FII 40.87%, DII 13.21%",
+        vol_spike: "Yes", vol_detail: "Active trading on results announcement",
+        qoq_profit: "Increase", qoq_profit_pct: "+26.6% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+11% QoQ",
+        price_15d: "+1.3%",
+        news: "Jan 2026 sales +24% YoY; UDO e-auto launch Feb 2026; Record tractor sales +47%; Golden Peacock Corporate Governance Award",
+        govt_theme: "Strong", govt_detail: "Defense (BEL partnership); PLI scheme; Make in India; EV push",
+        leadership: "Strong", lead_detail: "55%+ independent directors; DJSI leader; award-winning governance"
+    },
+    "MOSCHIP": {
+        company: "MosChip Technologies", nse_code: "MOSCHIP",
+        pe: 126.10, down_52w: -32.4,
+        qtr_result: "Average", qtr_detail: "Revenue +18.4% YoY, PAT -60.8% (labour code charges)",
+        fii_dii: "Weak", fii_detail: "FII 2.2%, DII 0%; very low engagement",
+        vol_spike: "Yes", vol_detail: "Upper circuit +10% on Jan 28; 25.35L shares traded",
+        qoq_profit: "Decrease", qoq_profit_pct: "-64.3% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+2% QoQ",
+        price_15d: "+10%",
+        news: "Rating upgraded from Sell to Hold (Jan 29); AgenticSky AI framework launched; Kerala Blasters partnership",
+        govt_theme: "Moderately Strong", govt_detail: "DLI scheme; PLI semiconductor; Make in India",
+        leadership: "Average", lead_detail: "New MD & CEO; 30+ yrs semiconductor experience on board"
+    },
+    "MOTILALOFS": {
+        company: "Motilal Oswal Financial", nse_code: "MOTILALOFS",
+        pe: 24.69, down_52w: -28.2,
+        qtr_result: "Very Good", qtr_detail: "Revenue +11% YoY, PAT +58% YoY; AUM +33% to ₹1.89L Cr",
+        fii_dii: "Stable", fii_detail: "FII 7.52%, DII 5.84%",
+        vol_spike: "Yes", vol_detail: "On Q3 results and dividend announcement",
+        qoq_profit: "Increase", qoq_profit_pct: "+99% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+11% YoY sequential growth",
+        price_15d: "+6.3%",
+        news: "Interim dividend ₹6/share; AUM grew 33% YoY to ₹1.89L Cr; Asset mgmt PAT +65% YoY; Digital India & Infra funds launched",
+        govt_theme: "Moderately Strong", govt_detail: "Digital India Fund; Infrastructure Fund; capital markets dev",
+        leadership: "Strong", lead_detail: "Raamdeo Agrawal & Motilal Oswal; QGLP Process; strong governance"
+    },
+    "NETWEB": {
+        company: "Netweb Technologies", nse_code: "NETWEB",
+        pe: 99.24, down_52w: -31.6,
+        qtr_result: "Very Good", qtr_detail: "Revenue +141% YoY, PAT +146.7% YoY; 64% AI systems contribution",
+        fii_dii: "Mixed", fii_detail: "FII 10.82%, DII 3.57%; Promoters reduced 3.65% on Feb 12",
+        vol_spike: "Yes", vol_detail: "Active trading post Q3 results",
+        qoq_profit: "Increase", qoq_profit_pct: "+146.7% YoY",
+        qoq_rev: "Increase", qoq_rev_pct: "+165% sequential",
+        price_15d: "Volatile; down from highs",
+        news: "₹1,734 Cr sovereign AI order (IndiaAI Mission); Record ₹804 Cr quarterly revenue; Make in India certified; 64% revenue from AI systems",
+        govt_theme: "Strong", govt_detail: "IndiaAI Mission; Make in India; IT Hardware PLI; Sovereign AI",
+        leadership: "Strong", lead_detail: "CEO Sanjay Lodha; robust governance; risk mgmt framework"
+    },
+    "NH": {
+        company: "Narayana Hrudayalaya", nse_code: "NH",
+        pe: 46.78, down_52w: -22.5,
+        qtr_result: "Good", qtr_detail: "Revenue +61.2% YoY (consolidated); Adj. PAT strong; Consol PAT -34.3% (UK acquisition)",
+        fii_dii: "Stable", fii_detail: "FII 11.10%, DII 7.91%; FII slightly increased",
+        vol_spike: "No", vol_detail: "Moderate trading",
+        qoq_profit: "Decrease", qoq_profit_pct: "-34.3% QoQ (UK acquisition impact)",
+        qoq_rev: "Increase", qoq_rev_pct: "+30.9% QoQ",
+        price_15d: "Downward pressure",
+        news: "₹1,500 Cr Kolkata hospital investment; Practice Plus Group UK acquisition; Earnings call Feb 17; Investment interest +52%",
+        govt_theme: "Moderately Strong", govt_detail: "Healthcare infra; Yeshasvini scheme; affordable care aligned with govt",
+        leadership: "Strong", lead_detail: "Dr. Emmanuel Rupert MD/CEO; 25 yrs clinical + 10 yrs admin; JCI accredited"
+    },
+    "OBEROIRLTY": {
+        company: "Oberoi Realty Ltd", nse_code: "OBEROIRLTY",
+        pe: 25.40, down_52w: -22.0,
+        qtr_result: "Average", qtr_detail: "Revenue +5.78% YoY, PAT +0.68% YoY (marginal)",
+        fii_dii: "Stable", fii_detail: "FII 16.6%, DII 13.4%",
+        vol_spike: "No", vol_detail: "Moderate",
+        qoq_profit: "Decrease", qoq_profit_pct: "-18% QoQ",
+        qoq_rev: "Decrease", qoq_rev_pct: "-16.1% QoQ",
+        price_15d: "-5.7%",
+        news: "₹5,400 Cr bid for 11-acre Bandra East railway land (highest bid); Hotel Horizon via NCLT ₹919 Cr; Aman luxury JV",
+        govt_theme: "Moderately Strong", govt_detail: "Railway land monetization; urban infra dev; Navi Mumbai Airport",
+        leadership: "Strong", lead_detail: "Vikas Oberoi 30+ yrs; Harvard; ISS Governance score 10; Best Governance Award 2023"
+    },
+    "SENCO": {
+        company: "Senco Gold Ltd", nse_code: "SENCO",
+        pe: 23.15, down_52w: -35.6,
+        qtr_result: "Very Good", qtr_detail: "Revenue +50.1% YoY, PAT +688.5% YoY (festive season)",
+        fii_dii: "Mixed", fii_detail: "FII 8.22% (declining from 8.81%), DII 12.08%",
+        vol_spike: "Yes", vol_detail: "Significant activity post Q3 results",
+        qoq_profit: "Increase", qoq_profit_pct: "+441.2% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+100% QoQ (doubled)",
+        price_15d: "+12%",
+        news: "Record Q3 on festive demand; Interim dividend ₹0.75; Store expansion to 200+ outlets; Customs duty cut (15% to 6%) margin impact",
+        govt_theme: "Weak", govt_detail: "Customs duty reduction; minimal direct govt policy support",
+        leadership: "Average", lead_detail: "CEO Suvankar Sen 19 yrs; adequate governance but no standouts"
+    },
+    "SENORES": {
+        company: "Senores Pharmaceuticals", nse_code: "SENORES",
+        pe: 57.59, down_52w: -6.7,
+        qtr_result: "Very Good", qtr_detail: "Revenue +64% YoY, PAT +105% YoY; 9M PAT +110%",
+        fii_dii: "Limited Data", fii_detail: "Limited institutional participation data available",
+        vol_spike: "No", vol_detail: "Activity around EGM for warrant issuance",
+        qoq_profit: "Increase", qoq_profit_pct: "+5-8% QoQ estimated",
+        qoq_rev: "Increase", qoq_rev_pct: "+3-5% QoQ estimated",
+        price_15d: "+1.5% to +2%",
+        news: "Strong Q3 with PAT +105%; Acquiring Apnar Pharma; Preferential warrants ₹95 Cr approved; High PE concern noted",
+        govt_theme: "Moderately Weak", govt_detail: "Domestic pharma; limited infra/defense/digital alignment",
+        leadership: "Strong", lead_detail: "Swapnil Shah: Promoter & MD 18+ yrs pharma experience"
+    },
+    "SPORTKING": {
+        company: "Sportking India Ltd", nse_code: "SPORTKING",
+        pe: 11.40, down_52w: -28.6,
+        qtr_result: "Good", qtr_detail: "Revenue +6% YoY, PAT +33% YoY; margin expansion 45bps",
+        fii_dii: "Weak", fii_detail: "FII 0.01%, DII 0.23%; minimal institutional interest",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Decrease", qoq_profit_pct: "-13% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+2.9% QoQ",
+        price_15d: "+22.6%",
+        news: "Strong domestic demand +29% YoY; ₹1,000 Cr greenfield capacity expansion commenced; 96% capacity utilization (highest in industry)",
+        govt_theme: "Moderately Strong", govt_detail: "Textile Make in India; PLI textile scheme eligible",
+        leadership: "Strong", lead_detail: "Munish Avasthi CEO 26+ yrs; est. 1977; Chairman 17.33% ownership"
+    },
+    "SYRMA": {
+        company: "Syrma SGS Technology", nse_code: "SYRMA",
+        pe: 57.59, down_52w: -3.9,
+        qtr_result: "Very Good", qtr_detail: "Revenue +43% YoY, EBITDA +67% YoY, PAT +108% YoY",
+        fii_dii: "Moderate", fii_detail: "FII 8.48%, DII 16.4%; rebalancing across quarters",
+        vol_spike: "Yes", vol_detail: "Surged 11% on Jan 30; best January since listing",
+        qoq_profit: "Increase", qoq_profit_pct: "Strong (9M PAT +101% YoY)",
+        qoq_rev: "Increase", qoq_rev_pct: "9M Revenue +17% YoY",
+        price_15d: "Stable near 52W high",
+        news: "Morgan Stanley upgraded to Overweight with ₹992 target; Exports surged 65%; PLI 2.0 participation; ₹1,800 Cr PCB push in AP",
+        govt_theme: "Strong", govt_detail: "PLI 2.0 IT Hardware; Make in India flagship; laptop/server manufacturing",
+        leadership: "Strong", lead_detail: "Sandeep Tandon 18 yrs; Jasbir Singh Gujral 39 yrs; strong ESG"
+    },
+    "WAAREEENER": {
+        company: "Waaree Energies Ltd", nse_code: "WAAREEENER",
+        pe: 26.10, down_52w: -20.3,
+        qtr_result: "Very Good", qtr_detail: "Revenue +70% YoY, PAT +134% YoY; EBITDA margin +840 bps",
+        fii_dii: "Stable", fii_detail: "FII 6.91%, DII 2.86%; limited institutional participation",
+        vol_spike: "Yes", vol_detail: "Rose 10.8% on Feb 5-6 on 150MW solar order + institutional buying",
+        qoq_profit: "Increase", qoq_profit_pct: "Record Q2 performance",
+        qoq_rev: "Increase", qoq_rev_pct: "Sequential growth positive",
+        price_15d: "+3.5% to +5%",
+        news: "150MW solar module order; 105MW order; CARE upgraded to AA Stable; ₹2,754 Cr capex planned; CEO departing May 2026",
+        govt_theme: "Strong", govt_detail: "Leading solar mfr; PLI Tranche II 6,000 MW; PM KUSUM; PM Surya Ghar; battery factory",
+        leadership: "Average", lead_detail: "Dr. Hitesh Doshi 38+ yrs (strong) but CEO departure May 2026 transition risk"
+    },
+    "WAAREERTL": {
+        company: "Waaree Renewable Tech", nse_code: "WAAREERTL",
+        pe: 40.47, down_52w: -30.6,
+        qtr_result: "Very Good", qtr_detail: "Revenue +136% YoY, PAT +125% YoY; Q3 Rev > full FY25",
+        fii_dii: "Weak", fii_detail: "FII 1.7%, DII 0.14%; minimal participation",
+        vol_spike: "No", vol_detail: "No unusual activity",
+        qoq_profit: "Increase", qoq_profit_pct: "9M PAT +139% YoY",
+        qoq_rev: "Increase", qoq_rev_pct: "9M Revenue +99% YoY",
+        price_15d: "+0.75% to +1%",
+        news: "Q3 revenue exceeds full FY25; Order book 2.92 GWp; ₹1,225 Cr acquisition of 55% ASPL by Apr 2026; 257 MWp wins",
+        govt_theme: "Strong", govt_detail: "Solar EPC; green energy pure play; PLI beneficiary; PM solar schemes",
+        leadership: "Strong", lead_detail: "Waaree Group 38 yrs heritage; strategic ASPL acquisition; strong board"
+    },
+    "ZAGGLE": {
+        company: "Zaggle Prepaid Ocean", nse_code: "ZAGGLE",
+        pe: 35.10, down_52w: -43.7,
+        qtr_result: "Very Good", qtr_detail: "Revenue +56% YoY, PAT +84% YoY; EBITDA crossed ₹50 Cr first time",
+        fii_dii: "Selling", fii_detail: "FII 7.6% (down from 9.17%), DII 7.8% (down from 14.56%), MF 3.7% (from 8.72%)",
+        vol_spike: "Yes", vol_detail: "Surged 7.03% on Feb 3; hit ₹306.55 intraday on Feb 10",
+        qoq_profit: "Increase", qoq_profit_pct: "+4% QoQ",
+        qoq_rev: "Increase", qoq_rev_pct: "+22% QoQ",
+        price_15d: "-2% to +2.25%",
+        news: "Strong Q3 results but FII/DII selling despite results; below all major moving averages; Valuation concerns",
+        govt_theme: "Moderately Weak", govt_detail: "B2B2C fintech SaaS; Digital India alignment but no direct scheme benefit",
+        leadership: "Average", lead_detail: "Avinash Godkhindi CEO; Board tenure avg 2.7 yrs; relatively new leadership"
+    }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let portfolioData = [];
+let filteredData = [];
+let sortCol = 'pnl_pct';
+let sortDir = 'desc';
+let charts = {};
+
+// ============================================================
+// CSV PARSING
+// ============================================================
+function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+        if (vals.length < 2 || !vals[0]) continue;
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = vals[idx] || '');
+        rows.push(obj);
+    }
+    return rows;
+}
+
+function processKiteData(rows) {
+    const excludeETFs = ['GOLDBEES', 'SILVERBEES', 'LIQUIDBEES', 'NIFTYBEES', 'BANKBEES'];
+    return rows
+        .filter(r => !excludeETFs.includes(r['Instrument']))
+        .map(r => {
+            const ticker = r['Instrument'];
+            const research = RESEARCH_DATA[ticker] || {};
+            return {
+                ticker,
+                company: research.company || ticker,
+                nse_code: research.nse_code || ticker,
+                qty: parseInt(r['Qty.']) || 0,
+                avg: parseFloat(r['Avg. cost']) || 0,
+                ltp: parseFloat(r['LTP']) || 0,
+                invested: parseFloat(r['Invested']) || 0,
+                current_val: parseFloat(r['Cur. val']) || 0,
+                pnl: parseFloat(r['P&L']) || 0,
+                pnl_pct: parseFloat(r['Net chg.']) || 0,
+                pe: research.pe || '-',
+                down_52w: research.down_52w || '-',
+                qtr_result: research.qtr_result || 'N/A',
+                qtr_detail: research.qtr_detail || '',
+                fii_dii: research.fii_dii || 'N/A',
+                fii_detail: research.fii_detail || '',
+                vol_spike: research.vol_spike || 'N/A',
+                vol_detail: research.vol_detail || '',
+                qoq_profit: research.qoq_profit || 'N/A',
+                qoq_profit_pct: research.qoq_profit_pct || '',
+                qoq_rev: research.qoq_rev || 'N/A',
+                qoq_rev_pct: research.qoq_rev_pct || '',
+                price_15d: research.price_15d || '-',
+                news: research.news || 'No recent news available',
+                govt_theme: research.govt_theme || 'N/A',
+                govt_detail: research.govt_detail || '',
+                leadership: research.leadership || 'N/A',
+                lead_detail: research.lead_detail || ''
+            };
+        });
+}
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const status = document.getElementById('upload-status');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const rows = parseCSV(e.target.result);
+            if (rows.length === 0) { status.className = 'upload-status error'; status.textContent = 'No data found in CSV'; return; }
+            portfolioData = processKiteData(rows);
+            filteredData = [...portfolioData];
+            status.className = 'upload-status success';
+            status.textContent = `Loaded ${portfolioData.length} holdings successfully!`;
+            showDashboard();
+        } catch(err) {
+            status.className = 'upload-status error';
+            status.textContent = 'Error parsing CSV: ' + err.message;
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Drag & drop
+const uploadArea = document.getElementById('upload-area');
+if (uploadArea) {
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const input = document.getElementById('csv-file');
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            handleFileUpload({ target: input });
+        }
+    });
+}
+
+// ============================================================
+// LOAD DEFAULT DATA
+// ============================================================
+function loadDefaultData() {
+    const defaultCSV = `"Instrument","Qty.","Avg. cost","LTP","Invested","Cur. val","P&L","Net chg.","Day chg.",""
+"ANTELOPUS",141,582.64,597.5,82151.6,84247.5,2095.9,2.55,-0.03,""
+"AUBANK",117,766.32,995.55,89658.95,116479.35,26820.4,29.91,-1.45,""
+"AVANTIFEED",128,1217.08,1348.8,155785.85,172646.4,16860.55,10.82,-0.03,""
+"BANKINDIA",666,162.71,169.95,108367.32,113186.7,4819.38,4.45,2.62,""
+"BONDADA",400,348.38,341.05,139350,136420,-2930,-2.1,0.21,""
+"BSE",37,2892.11,2739.2,107008.1,101350.4,-5657.7,-5.29,-2.33,""
+"CANBK",632,146.89,149.35,92834.48,94389.2,1554.72,1.67,2.33,""
+"EIHAHOTELS",221,349.15,335,77162.75,74035,-3127.75,-4.05,0.92,""
+"GKENERGY",481,148.22,122.44,71293.87,58893.64,-12400.23,-17.39,5,""
+"GOLDBEES",1800,80.91,124.66,145642.89,224388,78745.11,54.07,-1.78,""
+"ICICIBANK",68,1191.29,1401.8,81008,95322.4,14314.4,17.67,-0.69,""
+"ICIL",412,245.52,314.54,101156.05,129590.48,28434.43,28.11,0.38,""
+"KARURVYSYA",345,295.7,328,102016.5,113160,11143.5,10.92,3.67,""
+"KPEL",301,301.03,303.15,90610,91248.15,638.15,0.7,0.95,""
+"KPIGREEN",277,438.01,407.75,121329.55,112946.75,-8382.8,-6.91,0.78,""
+"KPITTECH",73,952.1,883.8,69503.1,64517.4,-4985.7,-7.17,0.4,""
+"M&M",30,3277.51,3481,98325.17,104430,6104.83,6.21,-0.82,""
+"MOSCHIP",287,202.5,191.79,58117.5,55043.73,-3073.77,-5.29,2.7,""
+"MOTILALOFS",123,776.16,782,95467.75,96186,718.25,0.75,-0.11,""
+"NETWEB",24,3487.43,3101,83698.25,74424,-9274.25,-11.08,1.09,""
+"NH",40,1893.14,1834.6,75725.5,73384,-2341.5,-3.09,-0.13,""
+"OBEROIRLTY",46,1641.41,1561,75504.9,71806,-3698.9,-4.9,-0.21,""
+"SENCO",350,316.03,343,110611.25,120050,9438.75,8.53,0.35,""
+"SENORES",125,783.18,802.5,97897.35,100312.5,2415.15,2.47,1.1,""
+"SILVERBEES",300,234.78,221.43,70434,66429,-4005,-5.69,-2.6,""
+"SPORTKING",1050,85.55,114.2,89825,119910,30085,33.49,3.55,""
+"SYRMA",108,823,864.75,88884,93393,4509,5.07,-0.05,""
+"WAAREEENER",30,3068,3069,92040,92070,30,0.03,-1.52,""
+"WAAREERTL",86,1075.67,889.25,92507.3,76475.5,-16031.8,-17.33,0.36,""
+"ZAGGLE",355,300.34,264.45,106619,93879.75,-12739.25,-11.95,-2.42,""`;
+    const rows = parseCSV(defaultCSV);
+    portfolioData = processKiteData(rows);
+    filteredData = [...portfolioData];
+    document.getElementById('upload-status').className = 'upload-status success';
+    document.getElementById('upload-status').textContent = `Loaded ${portfolioData.length} holdings!`;
+    showDashboard();
+}
+
+// ============================================================
+// SHOW DASHBOARD
+// ============================================================
+function showDashboard() {
+    document.getElementById('upload-area').style.display = 'none';
+    document.getElementById('main-dashboard').style.display = 'block';
+    document.getElementById('last-updated').textContent = `${portfolioData.length} stocks loaded • Data as of Feb 17, 2026`;
+    renderKPIs();
+    renderCharts();
+    renderAllTables();
+}
+
+// ============================================================
+// KPIs
+// ============================================================
+function renderKPIs() {
+    const d = filteredData;
+    const totalInvested = d.reduce((s, r) => s + r.invested, 0);
+    const totalCurrent = d.reduce((s, r) => s + r.current_val, 0);
+    const totalPnL = totalCurrent - totalInvested;
+    const pnlPct = totalInvested > 0 ? (totalPnL / totalInvested * 100) : 0;
+    const winners = d.filter(r => r.pnl_pct > 0).length;
+    const losers = d.filter(r => r.pnl_pct < 0).length;
+    const veryGoodCount = d.filter(r => r.qtr_result === 'Very Good').length;
+    const strongTheme = d.filter(r => r.govt_theme === 'Strong').length;
+    const volumeSpikes = d.filter(r => r.vol_spike === 'Yes').length;
+    const avgPE = d.filter(r => typeof r.pe === 'number').reduce((s, r) => s + r.pe, 0) / Math.max(d.filter(r => typeof r.pe === 'number').length, 1);
+
+    document.getElementById('kpi-section').innerHTML = `
+        <div class="kpi-card">
+            <div class="kpi-label">Total Invested</div>
+            <div class="kpi-value">₹${(totalInvested/100000).toFixed(1)}L</div>
+            <div class="kpi-sub">${d.length} holdings</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Current Value</div>
+            <div class="kpi-value">₹${(totalCurrent/100000).toFixed(1)}L</div>
+            <div class="kpi-sub ${totalPnL >= 0 ? 'positive' : 'negative'}">${totalPnL >= 0 ? '+' : ''}₹${(totalPnL/1000).toFixed(1)}K</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Overall P&L</div>
+            <div class="kpi-value" style="color:${pnlPct >= 0 ? 'var(--positive)' : 'var(--negative)'}">${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%</div>
+            <div class="kpi-sub">${winners}W / ${losers}L</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Very Good Results</div>
+            <div class="kpi-value" style="color:var(--positive)">${veryGoodCount}</div>
+            <div class="kpi-sub">of ${d.length} stocks</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Strong Govt Theme</div>
+            <div class="kpi-value" style="color:var(--accent)">${strongTheme}</div>
+            <div class="kpi-sub">aligned with policy</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Avg PE Ratio</div>
+            <div class="kpi-value">${avgPE.toFixed(1)}x</div>
+            <div class="kpi-sub">portfolio weighted</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Volume Spikes</div>
+            <div class="kpi-value" style="color:var(--warning)">${volumeSpikes}</div>
+            <div class="kpi-sub">stocks flagged</div>
+        </div>
+    `;
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+const COLORS = ['#4C72B0','#DD8452','#55A868','#C44E52','#8172B3','#937860','#DA8BC3','#8C8C8C','#CCB974','#64B5CD','#4ECDC4','#FF6B6B','#A8E6CF','#FFD93D','#6C5CE7'];
+
+function renderCharts() {
+    // Destroy existing charts
+    Object.values(charts).forEach(c => c.destroy());
+    charts = {};
+
+    const d = filteredData;
+
+    // P&L Chart
+    const pnlSorted = [...d].sort((a, b) => b.pnl_pct - a.pnl_pct);
+    charts.pnl = new Chart(document.getElementById('pnl-chart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: pnlSorted.map(r => r.ticker),
+            datasets: [{
+                label: 'P&L %',
+                data: pnlSorted.map(r => r.pnl_pct),
+                backgroundColor: pnlSorted.map(r => r.pnl_pct >= 0 ? 'rgba(52,168,83,0.7)' : 'rgba(234,67,53,0.7)'),
+                borderColor: pnlSorted.map(r => r.pnl_pct >= 0 ? '#34a853' : '#ea4335'),
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.x.toFixed(2)}%` } } },
+            scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0a6', callback: v => v + '%' } }, y: { grid: { display: false }, ticks: { color: '#9aa0a6', font: { size: 10 } } } }
+        }
+    });
+
+    // Results Quality Doughnut
+    const resultCounts = { 'Very Good': 0, 'Good': 0, 'Average': 0, 'Bad': 0 };
+    d.forEach(r => { if (resultCounts[r.qtr_result] !== undefined) resultCounts[r.qtr_result]++; });
+    charts.results = new Chart(document.getElementById('results-chart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(resultCounts),
+            datasets: [{ data: Object.values(resultCounts), backgroundColor: ['#34a853','#81c995','#fbbc04','#ea4335'], borderColor: '#1a1d29', borderWidth: 3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: '#9aa0a6', usePointStyle: true, padding: 15 } } } }
+    });
+
+    // Govt Theme Doughnut
+    const themeCounts = { 'Strong': 0, 'Moderately Strong': 0, 'Moderately Weak': 0, 'Weak': 0 };
+    d.forEach(r => { if (themeCounts[r.govt_theme] !== undefined) themeCounts[r.govt_theme]++; });
+    charts.theme = new Chart(document.getElementById('theme-chart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(themeCounts),
+            datasets: [{ data: Object.values(themeCounts), backgroundColor: ['#34a853','#81c995','#fbbc04','#ea4335'], borderColor: '#1a1d29', borderWidth: 3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: '#9aa0a6', usePointStyle: true, padding: 15 } } } }
+    });
+
+    // Invested Chart
+    const invSorted = [...d].sort((a, b) => b.invested - a.invested).slice(0, 15);
+    charts.invested = new Chart(document.getElementById('invested-chart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: invSorted.map(r => r.ticker),
+            datasets: [{
+                label: 'Invested (₹)',
+                data: invSorted.map(r => r.invested),
+                backgroundColor: COLORS.map(c => c + 'AA'),
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '₹' + (ctx.parsed.y / 1000).toFixed(1) + 'K' } } },
+            scales: { x: { grid: { display: false }, ticks: { color: '#9aa0a6', font: { size: 10 }, maxRotation: 45 } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0a6', callback: v => '₹' + (v / 1000).toFixed(0) + 'K' } } }
+        }
+    });
+}
+
+// ============================================================
+// BADGE HELPERS
+// ============================================================
+function getBadge(value, type) {
+    const v = (value || '').toLowerCase();
+    let cls = 'badge-neutral';
+    if (type === 'result') {
+        if (v === 'very good') cls = 'badge-very-good';
+        else if (v === 'good') cls = 'badge-good';
+        else if (v === 'average') cls = 'badge-average';
+        else if (v === 'bad') cls = 'badge-bad';
+    } else if (type === 'theme' || type === 'leadership') {
+        if (v === 'strong') cls = 'badge-strong';
+        else if (v === 'moderately strong') cls = 'badge-mod-strong';
+        else if (v === 'moderately weak') cls = 'badge-mod-weak';
+        else if (v === 'weak' || v === 'bad') cls = 'badge-weak';
+        else if (v === 'average') cls = 'badge-average';
+    } else if (type === 'change') {
+        if (v === 'increase') cls = 'badge-increase';
+        else if (v === 'decrease') cls = 'badge-decrease';
+    } else if (type === 'fii') {
+        if (v.includes('buying')) cls = 'badge-buying';
+        else if (v.includes('selling')) cls = 'badge-selling';
+        else cls = 'badge-neutral';
+    } else if (type === 'spike') {
+        cls = v === 'yes' ? 'badge-spike' : 'badge-no-spike';
+    }
+    return `<span class="badge ${cls}">${value}</span>`;
+}
+
+function getPnlClass(val) { return val >= 0 ? 'pnl-positive' : 'pnl-negative'; }
+function getPeClass(val) { if (typeof val !== 'number') return ''; return val > 50 ? 'pe-high' : val > 25 ? 'pe-medium' : 'pe-low'; }
+function getDownClass(val) { if (typeof val !== 'number') return ''; return val < -30 ? 'down-severe' : val < -15 ? 'down-moderate' : 'down-mild'; }
+
+// ============================================================
+// RENDER TABLES
+// ============================================================
+function renderAllTables() {
+    renderOverviewTable();
+    renderFundamentalTable();
+    renderNewsTable();
+}
+
+function renderOverviewTable() {
+    const tbody = document.getElementById('overview-tbody');
+    document.getElementById('stock-count').textContent = `(${filteredData.length} stocks)`;
+
+    tbody.innerHTML = filteredData.map(r => `
+        <tr>
+            <td class="ticker-cell">${r.ticker}</td>
+            <td class="company-cell">${r.company}</td>
+            <td><code style="background:rgba(138,180,248,0.1);padding:2px 8px;border-radius:4px;color:var(--accent);font-size:12px;">${r.nse_code}</code></td>
+            <td style="text-align:right">${r.qty.toLocaleString()}</td>
+            <td style="text-align:right">₹${r.avg.toFixed(0)}</td>
+            <td style="text-align:right">₹${r.ltp.toFixed(0)}</td>
+            <td style="text-align:right" class="${getPnlClass(r.pnl_pct)}">${r.pnl_pct >= 0 ? '+' : ''}${r.pnl_pct.toFixed(1)}%</td>
+            <td style="text-align:right" class="${getPeClass(r.pe)}">${typeof r.pe === 'number' ? r.pe.toFixed(1) : r.pe}</td>
+            <td style="text-align:right" class="${getDownClass(r.down_52w)}">${typeof r.down_52w === 'number' ? r.down_52w.toFixed(1) + '%' : r.down_52w}</td>
+            <td>${getBadge(r.qtr_result, 'result')}</td>
+            <td>${getBadge(r.fii_dii, 'fii')}</td>
+            <td>${getBadge(r.vol_spike, 'spike')}</td>
+            <td>${getBadge(r.qoq_profit, 'change')}</td>
+            <td>${getBadge(r.qoq_rev, 'change')}</td>
+            <td class="price-movement">${r.price_15d}</td>
+            <td>${getBadge(r.govt_theme, 'theme')}</td>
+            <td>${getBadge(r.leadership, 'leadership')}</td>
+            <td><button class="expand-btn" onclick="toggleDetail(this, '${r.ticker}')">+</button></td>
+        </tr>
+    `).join('');
+}
+
+function renderFundamentalTable() {
+    document.getElementById('fundamental-tbody').innerHTML = filteredData.map(r => `
+        <tr>
+            <td class="ticker-cell">${r.ticker}</td>
+            <td style="max-width:250px;">${r.qtr_detail}</td>
+            <td>${r.qoq_profit_pct}</td>
+            <td>${r.qoq_rev_pct}</td>
+            <td style="max-width:250px;">${r.fii_detail}</td>
+            <td>${r.vol_detail}</td>
+            <td style="max-width:250px;">${r.lead_detail}</td>
+        </tr>
+    `).join('');
+}
+
+function renderNewsTable() {
+    document.getElementById('news-tbody').innerHTML = filteredData.map(r => `
+        <tr>
+            <td class="ticker-cell">${r.ticker}</td>
+            <td class="news-cell">${r.news}</td>
+            <td>${getBadge(r.govt_theme, 'theme')}</td>
+            <td style="max-width:300px;font-size:12px;color:var(--text-secondary);">${r.govt_detail}</td>
+        </tr>
+    `).join('');
+}
+
+// ============================================================
+// EXPAND/COLLAPSE DETAIL ROW
+// ============================================================
+function toggleDetail(btn, ticker) {
+    const tr = btn.closest('tr');
+    const existingDetail = tr.nextElementSibling;
+    if (existingDetail && existingDetail.classList.contains('detail-row')) {
+        existingDetail.remove();
+        btn.textContent = '+';
+        return;
+    }
+    const r = portfolioData.find(s => s.ticker === ticker);
+    if (!r) return;
+    const detailRow = document.createElement('tr');
+    detailRow.classList.add('detail-row');
+    detailRow.innerHTML = `<td colspan="18">
+        <div class="detail-content">
+            <div class="detail-block"><h4>Quarterly Results</h4><p>${r.qtr_detail}</p></div>
+            <div class="detail-block"><h4>QoQ Profit</h4><p>${r.qoq_profit_pct}</p></div>
+            <div class="detail-block"><h4>QoQ Revenue</h4><p>${r.qoq_rev_pct}</p></div>
+            <div class="detail-block"><h4>FII/DII Detail</h4><p>${r.fii_detail}</p></div>
+            <div class="detail-block"><h4>Volume Detail</h4><p>${r.vol_detail || 'No unusual activity'}</p></div>
+            <div class="detail-block"><h4>Leadership</h4><p>${r.lead_detail}</p></div>
+            <div class="detail-block"><h4>Govt Theme</h4><p>${r.govt_detail}</p></div>
+            <div class="detail-block"><h4>Recent News</h4><p>${r.news}</p></div>
+        </div>
+    </td>`;
+    tr.after(detailRow);
+    btn.textContent = '−';
+}
+
+// ============================================================
+// SORTING
+// ============================================================
+function sortTable(col) {
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'desc'; }
+
+    // Clear all sort arrows
+    document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
+    const arrow = document.getElementById('sort-' + col);
+    if (arrow) arrow.textContent = sortDir === 'asc' ? ' ▲' : ' ▼';
+
+    filteredData.sort((a, b) => {
+        let av = a[col], bv = b[col];
+        if (typeof av === 'string') av = av.toLowerCase();
+        if (typeof bv === 'string') bv = bv.toLowerCase();
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    renderAllTables();
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function applyFilters() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const resultFilter = document.getElementById('filter-results').value;
+    const themeFilter = document.getElementById('filter-theme').value;
+    const pnlFilter = document.getElementById('filter-pnl').value;
+    const leadershipFilter = document.getElementById('filter-leadership').value;
+    const volumeFilter = document.getElementById('filter-volume').value;
+
+    filteredData = portfolioData.filter(r => {
+        if (search && !r.ticker.toLowerCase().includes(search) && !r.company.toLowerCase().includes(search)) return false;
+        if (resultFilter !== 'all' && r.qtr_result !== resultFilter) return false;
+        if (themeFilter !== 'all' && r.govt_theme !== themeFilter) return false;
+        if (pnlFilter === 'profit' && r.pnl_pct < 0) return false;
+        if (pnlFilter === 'loss' && r.pnl_pct >= 0) return false;
+        if (leadershipFilter !== 'all' && r.leadership !== leadershipFilter) return false;
+        if (volumeFilter !== 'all' && r.vol_spike !== volumeFilter) return false;
+        return true;
+    });
+
+    renderKPIs();
+    renderCharts();
+    renderAllTables();
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + tabName).classList.add('active');
+}
+</script>
+</body>
+</html>
