@@ -1,0 +1,37 @@
+name: Update Portfolio Dashboard
+
+on:
+  # Runs daily at 1:00 PM UTC (6:30 PM IST) — after market close
+  schedule:
+    - cron: '0 13 * * 1-5'  # Mon-Fri only
+
+  # Also allows manual trigger from GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch latest stock data
+        run: python update_data.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "Portfolio Bot"
+          git config user.email "bot@portfolio-dashboard.local"
+          git add index.html update_log.json
+          # Only commit if there are actual changes
+          git diff --cached --quiet || git commit -m "Auto-update: $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
