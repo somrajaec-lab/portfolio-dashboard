@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-02-26T21:38:49.904231+05:30",
+  "run_time": "2026-02-27T20:37:25.071942+05:30",
   "total": 28,
   "success": 11,
   "failed": 17,
@@ -14,9 +14,9 @@
     {
       "ticker": "AUBANK",
       "status": "ok",
-      "ltp": 970.1,
+      "ltp": 953.0,
       "pe": 8.0,
-      "down_52w": 48405.0
+      "down_52w": 47550.0
     },
     {
       "ticker": "AVANTIFEED",
@@ -28,9 +28,9 @@
     {
       "ticker": "BANKINDIA",
       "status": "ok",
-      "ltp": 177.02,
+      "ltp": 176.3,
       "pe": 8.0,
-      "down_52w": 8751.0
+      "down_52w": 8715.0
     },
     {
       "ticker": "BONDADA",
@@ -42,16 +42,16 @@
     {
       "ticker": "BSE",
       "status": "ok",
-      "ltp": 2774.0,
+      "ltp": 2709.9,
       "pe": 8.0,
-      "down_52w": 138600.0
+      "down_52w": 135395.0
     },
     {
       "ticker": "CANBK",
       "status": "ok",
-      "ltp": 158.65,
+      "ltp": 157.55,
       "pe": 8.0,
-      "down_52w": 7832.5
+      "down_52w": 7777.5
     },
     {
       "ticker": "EIHAHOTELS",
@@ -70,9 +70,9 @@
     {
       "ticker": "ICICIBANK",
       "status": "ok",
-      "ltp": 1401.6,
+      "ltp": 1379.4,
       "pe": 8.0,
-      "down_52w": 69980.0
+      "down_52w": 68870.0
     },
     {
       "ticker": "ICIL",
@@ -105,16 +105,16 @@
     {
       "ticker": "KPITTECH",
       "status": "ok",
-      "ltp": 793.2,
+      "ltp": 771.0,
       "pe": 8.0,
-      "down_52w": 39560.0
+      "down_52w": 38450.0
     },
     {
       "ticker": "M&M",
       "status": "ok",
-      "ltp": 3480.0,
+      "ltp": 3402.6,
       "pe": 8.0,
-      "down_52w": 173900.0
+      "down_52w": 170030.0
     },
     {
       "ticker": "MOSCHIP",
@@ -126,9 +126,9 @@
     {
       "ticker": "MOTILALOFS",
       "status": "ok",
-      "ltp": 732.0,
+      "ltp": 725.8,
       "pe": 8.0,
-      "down_52w": 36500.0
+      "down_52w": 36190.0
     },
     {
       "ticker": "NETWEB",
@@ -140,16 +140,16 @@
     {
       "ticker": "NH",
       "status": "ok",
-      "ltp": 1856.8,
+      "ltp": 1853.9,
       "pe": 8.0,
-      "down_52w": 92740.0
+      "down_52w": 30798.3
     },
     {
       "ticker": "OBEROIRLTY",
       "status": "ok",
-      "ltp": 1541.0,
+      "ltp": 1525.0,
       "pe": 8.0,
-      "down_52w": 76950.0
+      "down_52w": 76150.0
     },
     {
       "ticker": "SENCO",
