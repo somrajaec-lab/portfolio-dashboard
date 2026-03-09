@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-03-06T20:32:46.712539+05:30",
+  "run_time": "2026-03-09T21:46:16.481757+05:30",
   "total": 28,
   "success": 11,
   "failed": 17,
@@ -14,9 +14,9 @@
     {
       "ticker": "AUBANK",
       "status": "ok",
-      "ltp": 964.0,
+      "ltp": 930.55,
       "pe": 8.0,
-      "down_52w": 48100.0
+      "down_52w": 46427.5
     },
     {
       "ticker": "AVANTIFEED",
@@ -28,9 +28,9 @@
     {
       "ticker": "BANKINDIA",
       "status": "ok",
-      "ltp": 159.39,
+      "ltp": 151.94,
       "pe": 8.0,
-      "down_52w": 7869.5
+      "down_52w": 7497.0
     },
     {
       "ticker": "BONDADA",
@@ -42,16 +42,16 @@
     {
       "ticker": "BSE",
       "status": "ok",
-      "ltp": 2750.9,
+      "ltp": 2766.8,
       "pe": 8.0,
-      "down_52w": 137445.0
+      "down_52w": 138240.0
     },
     {
       "ticker": "CANBK",
       "status": "ok",
-      "ltp": 146.02,
+      "ltp": 140.25,
       "pe": 8.0,
-      "down_52w": 7201.0
+      "down_52w": 6912.5
     },
     {
       "ticker": "EIHAHOTELS",
@@ -70,9 +70,9 @@
     {
       "ticker": "ICICIBANK",
       "status": "ok",
-      "ltp": 1315.1,
+      "ltp": 1275.0,
       "pe": 8.0,
-      "down_52w": 65655.0
+      "down_52w": 63650.0
     },
     {
       "ticker": "ICIL",
@@ -105,16 +105,16 @@
     {
       "ticker": "KPITTECH",
       "status": "ok",
-      "ltp": 698.3,
+      "ltp": 692.5,
       "pe": 8.0,
-      "down_52w": 34815.0
+      "down_52w": 34525.0
     },
     {
       "ticker": "M&M",
       "status": "ok",
-      "ltp": 3333.0,
+      "ltp": 3184.5,
       "pe": 8.0,
-      "down_52w": 166550.0
+      "down_52w": 159125.0
     },
     {
       "ticker": "MOSCHIP",
@@ -126,9 +126,9 @@
     {
       "ticker": "MOTILALOFS",
       "status": "ok",
-      "ltp": 716.0,
+      "ltp": 695.0,
       "pe": 8.0,
-      "down_52w": 35700.0
+      "down_52w": 34650.0
     },
     {
       "ticker": "NETWEB",
@@ -140,9 +140,9 @@
     {
       "ticker": "NH",
       "status": "ok",
-      "ltp": 1767.3,
+      "ltp": 1762.0,
       "pe": 8.0,
-      "down_52w": 88265.0
+      "down_52w": 88000.0
     },
     {
       "ticker": "OBEROIRLTY",
