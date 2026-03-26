@@ -1,8 +1,8 @@
 {
-  "run_time": "2026-03-25T19:49:40.808919+05:30",
+  "run_time": "2026-03-26T19:56:06.668242+05:30",
   "total": 28,
-  "success": 14,
-  "failed": 14,
+  "success": 12,
+  "failed": 16,
   "stocks": [
     {
       "ticker": "ANTELOPUS",
@@ -49,9 +49,9 @@
     {
       "ticker": "CANBK",
       "status": "ok",
-      "ltp": null,
-      "pe": null,
-      "down_52w": null
+      "ltp": 136.6,
+      "pe": 8.0,
+      "down_52w": 6730.0
     },
     {
       "ticker": "EIHAHOTELS",
@@ -118,7 +118,7 @@
     },
     {
       "ticker": "MOSCHIP",
-      "status": "ok",
+      "status": "failed",
       "ltp": null,
       "pe": null,
       "down_52w": null
@@ -134,7 +134,7 @@
       "ticker": "NETWEB",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
@@ -188,7 +188,7 @@
     },
     {
       "ticker": "WAAREERTL",
-      "status": "ok",
+      "status": "failed",
       "ltp": null,
       "pe": null,
       "down_52w": null
