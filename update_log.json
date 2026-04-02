@@ -1,8 +1,8 @@
 {
-  "run_time": "2026-04-01T20:12:39.277259+05:30",
+  "run_time": "2026-04-02T19:52:31.887723+05:30",
   "total": 28,
-  "success": 12,
-  "failed": 16,
+  "success": 11,
+  "failed": 17,
   "stocks": [
     {
       "ticker": "ANTELOPUS",
@@ -14,9 +14,9 @@
     {
       "ticker": "AUBANK",
       "status": "ok",
-      "ltp": 873.85,
+      "ltp": 869.95,
       "pe": 8.0,
-      "down_52w": 43592.5
+      "down_52w": 43397.5
     },
     {
       "ticker": "AVANTIFEED",
@@ -28,9 +28,9 @@
     {
       "ticker": "BANKINDIA",
       "status": "ok",
-      "ltp": 141.6,
+      "ltp": 139.35,
       "pe": 8.0,
-      "down_52w": 6980.0
+      "down_52w": 6867.5
     },
     {
       "ticker": "BONDADA",
@@ -42,16 +42,16 @@
     {
       "ticker": "BSE",
       "status": "ok",
-      "ltp": 2865.9,
+      "ltp": 2856.1,
       "pe": 8.0,
-      "down_52w": 143195.0
+      "down_52w": 142705.0
     },
     {
       "ticker": "CANBK",
       "status": "ok",
-      "ltp": 127.7,
+      "ltp": 127.0,
       "pe": 8.0,
-      "down_52w": 6285.0
+      "down_52w": 6250.0
     },
     {
       "ticker": "EIHAHOTELS",
@@ -70,9 +70,9 @@
     {
       "ticker": "ICICIBANK",
       "status": "ok",
-      "ltp": 1213.0,
+      "ltp": 1216.5,
       "pe": 8.0,
-      "down_52w": 60550.0
+      "down_52w": 60725.0
     },
     {
       "ticker": "ICIL",
@@ -83,10 +83,10 @@
     },
     {
       "ticker": "KARURVYSYA",
-      "status": "ok",
-      "ltp": 291.5,
-      "pe": 8.0,
-      "down_52w": 3543.8
+      "status": "failed",
+      "ltp": null,
+      "pe": null,
+      "down_52w": null
     },
     {
       "ticker": "KPEL",
@@ -105,16 +105,16 @@
     {
       "ticker": "KPITTECH",
       "status": "ok",
-      "ltp": 674.1,
+      "ltp": 696.0,
       "pe": 8.0,
-      "down_52w": 33605.0
+      "down_52w": 34700.0
     },
     {
       "ticker": "M&M",
       "status": "ok",
-      "ltp": 3021.0,
+      "ltp": 3007.0,
       "pe": 8.0,
-      "down_52w": 150950.0
+      "down_52w": 150250.0
     },
     {
       "ticker": "MOSCHIP",
@@ -126,9 +126,9 @@
     {
       "ticker": "MOTILALOFS",
       "status": "ok",
-      "ltp": 679.65,
+      "ltp": 684.0,
       "pe": 8.0,
-      "down_52w": 33882.5
+      "down_52w": 34100.0
     },
     {
       "ticker": "NETWEB",
@@ -140,16 +140,16 @@
     {
       "ticker": "NH",
       "status": "ok",
-      "ltp": 1635.8,
+      "ltp": 1627.9,
       "pe": 8.0,
-      "down_52w": 81690.0
+      "down_52w": 81295.0
     },
     {
       "ticker": "OBEROIRLTY",
       "status": "ok",
-      "ltp": 1474.0,
+      "ltp": 1511.7,
       "pe": 8.0,
-      "down_52w": 73600.0
+      "down_52w": 75485.0
     },
     {
       "ticker": "SENCO",
