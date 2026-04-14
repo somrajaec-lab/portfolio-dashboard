@@ -1,8 +1,8 @@
 {
-  "run_time": "2026-04-13T20:22:13.010046+05:30",
+  "run_time": "2026-04-14T20:21:35.754641+05:30",
   "total": 28,
-  "success": 11,
-  "failed": 17,
+  "success": 10,
+  "failed": 18,
   "stocks": [
     {
       "ticker": "ANTELOPUS",
@@ -34,7 +34,7 @@
     },
     {
       "ticker": "BONDADA",
-      "status": "ok",
+      "status": "failed",
       "ltp": null,
       "pe": null,
       "down_52w": null
