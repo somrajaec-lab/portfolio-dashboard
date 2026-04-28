@@ -1,28 +1,28 @@
 {
-  "run_time": "2026-04-27T20:38:58.059693+05:30",
+  "run_time": "2026-04-28T20:58:04.454697+05:30",
   "total": 28,
-  "success": 14,
-  "failed": 14,
+  "success": 23,
+  "failed": 5,
   "stocks": [
     {
       "ticker": "ANTELOPUS",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "AUBANK",
       "status": "ok",
-      "ltp": 1040.5,
-      "pe": 8.0,
-      "down_52w": 51925.0
+      "ltp": null,
+      "pe": 6.0,
+      "down_52w": null
     },
     {
       "ticker": "AVANTIFEED",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
@@ -42,27 +42,27 @@
     {
       "ticker": "BSE",
       "status": "ok",
-      "ltp": 3542.0,
+      "ltp": 3630.0,
       "pe": 8.0,
-      "down_52w": 177000.0
+      "down_52w": 181400.0
     },
     {
       "ticker": "CANBK",
       "status": "ok",
-      "ltp": 140.55,
-      "pe": 8.0,
-      "down_52w": 6927.5
+      "ltp": null,
+      "pe": 6.0,
+      "down_52w": null
     },
     {
       "ticker": "EIHAHOTELS",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "GKENERGY",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
       "pe": null,
       "down_52w": null
@@ -70,9 +70,9 @@
     {
       "ticker": "ICICIBANK",
       "status": "ok",
-      "ltp": 1316.6,
-      "pe": 8.0,
-      "down_52w": 65730.0
+      "ltp": null,
+      "pe": null,
+      "down_52w": null
     },
     {
       "ticker": "ICIL",
@@ -83,14 +83,14 @@
     },
     {
       "ticker": "KARURVYSYA",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "KPEL",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
       "pe": null,
       "down_52w": null
@@ -105,71 +105,71 @@
     {
       "ticker": "KPITTECH",
       "status": "ok",
-      "ltp": 736.0,
+      "ltp": 736.75,
       "pe": 8.0,
-      "down_52w": 36700.0
+      "down_52w": 36737.5
     },
     {
       "ticker": "M&M",
       "status": "ok",
-      "ltp": 3104.8,
+      "ltp": 3084.8,
       "pe": 8.0,
-      "down_52w": 155140.0
+      "down_52w": 154140.0
     },
     {
       "ticker": "MOSCHIP",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "MOTILALOFS",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "NETWEB",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "NH",
       "status": "ok",
-      "ltp": 1799.0,
-      "pe": 8.0,
-      "down_52w": 89850.0
+      "ltp": null,
+      "pe": 6.0,
+      "down_52w": null
     },
     {
       "ticker": "OBEROIRLTY",
       "status": "ok",
-      "ltp": 1721.7,
-      "pe": 8.0,
-      "down_52w": 85985.0
+      "ltp": null,
+      "pe": 6.0,
+      "down_52w": null
     },
     {
       "ticker": "SENCO",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
       "pe": null,
       "down_52w": null
     },
     {
       "ticker": "SENORES",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "SPORTKING",
-      "status": "failed",
+      "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
@@ -183,21 +183,21 @@
       "ticker": "WAAREEENER",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
       "ticker": "WAAREERTL",
-      "status": "ok",
+      "status": "failed",
       "ltp": null,
       "pe": null,
       "down_52w": null
     },
     {
       "ticker": "ZAGGLE",
-      "status": "ok",
+      "status": "failed",
       "ltp": null,
-      "pe": 6.0,
+      "pe": null,
       "down_52w": null
     }
   ]
