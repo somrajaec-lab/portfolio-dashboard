@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-10-02T23:44:53.621443+05:30",
+  "run_time": "2026-10-07T00:19:24.053709+05:30",
   "total": 28,
   "success": 28,
   "failed": 0,
@@ -50,7 +50,7 @@
       "ticker": "CANBK",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
