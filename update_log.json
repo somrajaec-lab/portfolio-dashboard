@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-10-08T00:44:24.842667+05:30",
+  "run_time": "2026-10-09T00:40:42.155534+05:30",
   "total": 28,
   "success": 28,
   "failed": 0,
@@ -15,7 +15,7 @@
       "ticker": "AUBANK",
       "status": "ok",
       "ltp": null,
-      "pe": 6.0,
+      "pe": null,
       "down_52w": null
     },
     {
@@ -43,7 +43,7 @@
       "ticker": "BSE",
       "status": "ok",
       "ltp": null,
-      "pe": 6.0,
+      "pe": null,
       "down_52w": null
     },
     {
