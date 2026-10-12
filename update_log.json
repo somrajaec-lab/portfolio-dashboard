@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-10-10T00:11:20.294748+05:30",
+  "run_time": "2026-10-13T03:07:25.846125+05:30",
   "total": 28,
   "success": 28,
   "failed": 0,
@@ -92,7 +92,7 @@
       "ticker": "KPEL",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
