@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-11-04T01:28:58.813094+05:30",
+  "run_time": "2026-11-05T01:48:43.632338+05:30",
   "total": 28,
   "success": 28,
   "failed": 0,
@@ -120,7 +120,7 @@
       "ticker": "MOSCHIP",
       "status": "ok",
       "ltp": null,
-      "pe": 6.0,
+      "pe": null,
       "down_52w": null
     },
     {
