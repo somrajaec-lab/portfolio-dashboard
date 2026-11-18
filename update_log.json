@@ -1,5 +1,5 @@
 {
-  "run_time": "2026-11-18T03:02:31.410204+05:30",
+  "run_time": "2026-11-19T02:38:45.824459+05:30",
   "total": 28,
   "success": 28,
   "failed": 0,
@@ -36,7 +36,7 @@
       "ticker": "BONDADA",
       "status": "ok",
       "ltp": null,
-      "pe": null,
+      "pe": 6.0,
       "down_52w": null
     },
     {
